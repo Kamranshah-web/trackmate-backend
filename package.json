@@ -1,12 +1,16 @@
 {
   "name": "trackmate-backend",
   "version": "1.0.0",
-  "description": "TrackMate backend",
-  "main": "backend/index.js",
-  "scripts": {
-    "start": "node backend/index.js"
-  },
+  "description": "TrackMate backend server",
+  "main": "index.js",
   "type": "commonjs",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "Kamran Shah",
+  "license": "ISC",
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
