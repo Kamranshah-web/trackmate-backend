@@ -7,9 +7,12 @@ const jwt = require("jsonwebtoken");
 // ---------------- Signup ----------------
 router.post("/signup", async (req, res) => {
     try {
+        console.log("SIGNUP_REQ:", req.body); // 🔹 Debug: request aa rahi hai ya nahi
+
         let { email, password, username, phone } = req.body;
 
         if (!email || !password || !username || !phone) {
+            console.log("SIGNUP_FAIL: Missing fields");
             return res
                 .status(400)
                 .json({ success: false, message: "All fields required" });
@@ -20,6 +23,7 @@ router.post("/signup", async (req, res) => {
 
         const existing = await User.findOne({ email });
         if (existing) {
+            console.log("SIGNUP_FAIL: Email exists", email);
             return res
                 .status(409)
                 .json({ success: false, message: "Email already exists" });
@@ -36,10 +40,11 @@ router.post("/signup", async (req, res) => {
 
         await newUser.save();
 
+        console.log("SIGNUP_SUCCESS:", { email, username }); // 🔹 Debug: signup success
         return res.json({ success: true, message: "Signup successful" });
 
     } catch (err) {
-        console.error("Signup Error:", err.message);
+        console.error("SIGNUP_ERROR:", err.message);
         return res.status(500).json({ success: false, message: "Server error" });
     }
 });
@@ -47,9 +52,12 @@ router.post("/signup", async (req, res) => {
 // ---------------- Login ----------------
 router.post("/login", async (req, res) => {
     try {
+        console.log("LOGIN_REQ:", req.body); // 🔹 Debug: login request
+
         let { email, password } = req.body;
 
         if (!email || !password) {
+            console.log("LOGIN_FAIL: Missing email or password");
             return res
                 .status(400)
                 .json({ success: false, message: "Email and password required" });
@@ -60,21 +68,24 @@ router.post("/login", async (req, res) => {
 
         const user = await User.findOne({ email });
         if (!user) {
+            console.log("LOGIN_FAIL: User not found", email);
             return res.status(401).json({ success: false, message: "Invalid credentials!" });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
+            console.log("LOGIN_FAIL: Wrong password", email);
             return res.status(401).json({ success: false, message: "Invalid credentials!" });
         }
 
         // 🔑 Generate JWT token
         const token = jwt.sign(
             { id: user._id, email: user.email },
-            process.env.JWT_SECRET,  // Ensure JWT_SECRET is set in env
+            process.env.JWT_SECRET,
             { expiresIn: "7d" }
         );
 
+        console.log("LOGIN_SUCCESS:", { email }); // 🔹 Debug: login success
         return res.json({
             success: true,
             message: "Login successful!",
@@ -82,7 +93,7 @@ router.post("/login", async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Login Error:", error.message);
+        console.error("LOGIN_ERROR:", error.message);
         return res.status(500).json({ success: false, message: "Server error" });
     }
 });
