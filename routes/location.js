@@ -3,15 +3,20 @@ const router = express.Router();
 const auth = require("../middleware/auth");
 const User = require("../models/User");
 
-// 🔒 Update user location + lastSeen
+// 📡 UPDATE LOGGED-IN USER LOCATION
 router.post("/update", auth, async (req, res) => {
     try {
         const { lat, lng } = req.body;
 
-        if (lat === undefined || lng === undefined) {
+        // ✅ Prevent invalid / 0,0 locations
+        if (
+            lat === undefined || lng === undefined ||
+            lat === 0 || lng === 0 ||
+            isNaN(lat) || isNaN(lng)
+        ) {
             return res.status(400).json({
                 success: false,
-                message: "Latitude and Longitude required"
+                message: "Invalid latitude or longitude"
             });
         }
 
@@ -31,13 +36,11 @@ router.post("/update", auth, async (req, res) => {
 
         res.json({
             success: true,
-            message: "Location updated",
-            lat,
-            lng,
-            lastSeen: user.lastSeen
+            message: "Location updated successfully"
         });
 
     } catch (error) {
+        console.error("Update User Location Error:", error.message);
         res.status(500).json({
             success: false,
             message: "Server error",
